@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none';">
+<title>UC Medical Plan Availability Lookup — 2026</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --uc-navy: #022851;
+    --uc-navy-light: #1d4876;
+    --uc-gold: #FFBF00;
+    --uc-gold-dark: #B58500;
+    --ink: #111418;
+    --ink-soft: #3a4351;
+    --paper: #ffffff;
+    --mist: #f4f6f8;
+    --mist-edge: #dde3eb;
+    --rule: #c3cbd6;
+    --ok-bg: #e8f4eb;
+    --ok-ink: #1b5e29;
+    --ok-edge: #7fb48d;
+    --warn-bg: #fff4dc;
+    --warn-ink: #6d4a00;
+    --warn-edge: #d6a94a;
+    --na-bg: #f1f3f6;
+    --na-ink: #5a6573;
+    --na-edge: #c3cbd6;
+    --focus: #0b5fff;
+    --error-ink: #a8122a;
+  }
+  /* Forced dark (user chose Dark) */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --uc-navy: #4a7bb8;
+    --uc-navy-light: #6b94c8;
+    --ink: #e8ecf2;
+    --ink-soft: #b6bdc8;
+    --paper: #1a1f28;
+    --mist: #222831;
+    --mist-edge: #3a4351;
+    --rule: #4a5362;
+    --ok-bg: #1d3526;
+    --ok-ink: #a8d9b2;
+    --ok-edge: #3f7651;
+    --warn-bg: #3d2e0a;
+    --warn-ink: #f0ce7a;
+    --warn-edge: #8a6a1f;
+    --na-bg: #262c36;
+    --na-ink: #a0a9b5;
+    --na-edge: #3a4351;
+    --focus: #8ab4ff;
+    --error-ink: #ff9aa8;
+  }
+  /* Auto follows system when set to Auto */
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+      color-scheme: dark;
+      --uc-navy: #4a7bb8;
+      --uc-navy-light: #6b94c8;
+      --ink: #e8ecf2;
+      --ink-soft: #b6bdc8;
+      --paper: #1a1f28;
+      --mist: #222831;
+      --mist-edge: #3a4351;
+      --rule: #4a5362;
+      --ok-bg: #1d3526;
+      --ok-ink: #a8d9b2;
+      --ok-edge: #3f7651;
+      --warn-bg: #3d2e0a;
+      --warn-ink: #f0ce7a;
+      --warn-edge: #8a6a1f;
+      --na-bg: #262c36;
+      --na-ink: #a0a9b5;
+      --na-edge: #3a4351;
+      --focus: #8ab4ff;
+      --error-ink: #ff9aa8;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--mist);
+  }
+
+  /* Visible skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .skip-link:focus {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: auto;
+    height: auto;
+    padding: 10px 16px;
+    background: var(--uc-navy);
+    color: #fff;
+    z-index: 999;
+    border-radius: 4px;
+    font-weight: 600;
+    outline: 3px solid var(--uc-gold);
+  }
+
+  /* Focus indicators (WCAG 2.4.7) */
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline-offset: 2px;
+  }
+
+  header.masthead {
+    background: var(--uc-navy);
+    color: #fff;
+    border-bottom: 4px solid var(--uc-gold);
+  }
+  .masthead-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 22px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .masthead-text { flex: 1 1 auto; min-width: 260px; }
+  .masthead h1 {
+    margin: 0 0 4px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .masthead p {
+    margin: 0;
+    color: #d9e2ee;
+    font-size: 0.95rem;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .theme-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .theme-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .theme-btn[aria-pressed="true"] {
+    background: var(--uc-gold);
+    color: var(--uc-navy);
+    font-weight: 600;
+  }
+  .theme-btn[aria-pressed="true"]:hover {
+    background: var(--uc-gold);
+  }
+  .theme-btn:focus-visible {
+    outline: 3px solid var(--uc-gold);
+    outline-offset: 2px;
+  }
+  .theme-btn[aria-pressed="true"]:focus-visible {
+    outline-color: #fff;
+  }
+  .theme-btn svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 520px) {
+    .theme-btn .theme-btn-label { display: none; }
+    .theme-btn { padding: 6px 10px; }
+  }
+
+  main {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  section + section { margin-top: 32px; }
+
+  h2 {
+    margin: 0 0 14px 0;
+    font-size: 1.2rem;
+    color: var(--uc-navy);
+    border-bottom: 2px solid var(--uc-gold);
+    padding-bottom: 6px;
+    display: inline-block;
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--mist-edge);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  /* Always-available (PPO) panel */
+  .ppo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .ppo-list { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  .ppo-item {
+    border-left: 4px solid var(--uc-gold);
+    background: var(--mist);
+    padding: 12px 14px;
+    border-radius: 0 4px 4px 0;
+  }
+  .ppo-item-title {
+    font-weight: 600;
+    color: var(--uc-navy);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .ppo-item-scope {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .ppo-item-plans {
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  /* Form */
+  .lookup-form {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .lookup-form { grid-template-columns: 1fr 1.3fr auto; align-items: end; }
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .field .help {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .field .error {
+    font-size: 0.85rem;
+    color: var(--error-ink);
+    font-weight: 600;
+    margin: 0;
+    min-height: 1em;
+  }
+  input[type="text"], select {
+    font: inherit;
+    padding: 10px 12px;
+    border: 2px solid var(--rule);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 44px; /* touch target */
+  }
+  input[aria-invalid="true"], select[aria-invalid="true"] {
+    border-color: var(--error-ink);
+  }
+  select:disabled {
+    background: var(--mist);
+    color: var(--ink-soft);
+    cursor: not-allowed;
+  }
+  .submit-row {
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: 2px solid var(--uc-navy);
+    border-radius: 4px;
+    background: var(--uc-navy);
+    color: #fff;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background-color 0.15s, transform 0.05s;
+  }
+  button:hover { background: var(--uc-navy-light); border-color: var(--uc-navy-light); }
+  button:active { transform: translateY(1px); }
+  button.secondary {
+    background: transparent;
+    color: var(--uc-navy);
+  }
+  button.secondary:hover {
+    background: var(--mist);
+    color: var(--uc-navy);
+  }
+
+  /* Results */
+  .results-placeholder {
+    padding: 20px;
+    background: var(--mist);
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .results-context {
+    background: var(--mist);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    border-left: 4px solid var(--uc-navy);
+  }
+  .results-context strong { color: var(--uc-navy); }
+  .results-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .result-item {
+    padding: 14px 16px;
+    border-radius: 6px;
+    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  @media (min-width: 560px) {
+    .result-item {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+  }
+  .result-item.ok {
+    background: var(--ok-bg);
+    border-color: var(--ok-edge);
+    color: var(--ok-ink);
+  }
+  .result-item.na {
+    background: var(--na-bg);
+    border-color: var(--na-edge);
+    color: var(--na-ink);
+  }
+  .result-plan {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .result-status {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .result-status.status-na { font-style: italic; }
+
+  .mismatch-warning {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-edge);
+    color: var(--warn-ink);
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+  .mismatch-warning strong { display: block; margin-bottom: 4px; }
+
+  /* Notes section */
+  .notes {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .notes ul { padding-left: 20px; margin: 8px 0; }
+  .notes li { margin-bottom: 6px; }
+
+  /* Via Benefits */
+  .via-benefits {
+    border-left: 4px solid var(--uc-navy);
+  }
+
+  footer {
+    margin-top: 40px;
+    padding: 20px 24px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--mist-edge);
+  }
+
+  /* Screen-reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  @media print {
+    .masthead { background: none; color: #000; border-bottom: 2px solid #000; }
+    .masthead p { color: #333; }
+    button, .skip-link { display: none; }
+    body { background: #fff; }
+    .card { border: 1px solid #999; page-break-inside: avoid; }
+  }
+</style>
+<script src="theme-init.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="masthead" role="banner">
+    <div class="masthead-inner">
+      <div class="masthead-text">
+        <h1>UC Medical Plan Availability in 2026</h1>
+        <p>Where you live and/or work can limit the medical plans available to you.</p>
+      </div>
+      <div class="theme-toggle" role="group" aria-label="Color theme">
+        <button type="button" class="theme-btn" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="theme-btn-label">Light</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-value="auto" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 3 A9 9 0 0 1 12 21 Z" fill="currentColor"/>
+          </svg>
+          <span class="theme-btn-label">Auto</span>
+        </button>
+        <button type="button" class="theme-btn" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span class="theme-btn-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+
+    <!-- Always-available PPO plans -->
+    <section aria-labelledby="ppo-heading">
+      <h2 id="ppo-heading">PPO Plans</h2>
+      <div class="card">
+        <p style="margin-top:0;">These PPO plans are available without a ZIP or county lookup:</p>
+        <ul class="ppo-list">
+          <li class="ppo-item">
+            <span class="ppo-item-title">UC Medicare Choice</span>
+            <span class="ppo-item-scope">Throughout California</span>
+            <span class="ppo-item-plans">PPO through UnitedHealthcare. Non-Medicare family members may use UC Blue &amp; Gold HMO through Health Net.</span>
+          </li>
+          <li class="ppo-item">
+            <span class="ppo-item-title">HealthSavings+, UC Care, UC High Option, UC Medicare PPO (&plusmn;Rx)</span>
+            <span class="ppo-item-scope">Throughout the USA</span>
+            <span class="ppo-item-plans">PPO plans through Anthem Blue Cross.</span>
+          </li>
+          <li class="ppo-item">
+            <span class="ppo-item-title">HealthSavings+, UC Care</span>
+            <span class="ppo-item-scope">Worldwide</span>
+            <span class="ppo-item-plans">PPO plans through Anthem Blue Cross.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- HMO lookup -->
+    <section aria-labelledby="lookup-heading">
+      <h2 id="lookup-heading">HMO Plan Lookup</h2>
+      <div class="card">
+        <p style="margin-top:0;">HMO plans are available only in urban California. Enter your ZIP code and select your corresponding county below.</p>
+
+        <form class="lookup-form" id="lookup-form" novalidate>
+          <div class="field">
+            <label for="zip-input">1. Enter ZIP code</label>
+            <input
+              type="text"
+              id="zip-input"
+              name="zip"
+              inputmode="numeric"
+              pattern="[0-9]{5}"
+              maxlength="5"
+              autocomplete="postal-code"
+              aria-describedby="zip-help zip-error"
+              required>
+            <p class="help" id="zip-help">5-digit California ZIP code.</p>
+            <p class="error" id="zip-error" role="alert" aria-live="polite"></p>
+          </div>
+
+          <div class="field">
+            <label for="county-select">2. Choose corresponding county</label>
+            <select id="county-select" name="county" aria-describedby="county-help county-error" disabled required>
+              <option value="">Enter a ZIP code first</option>
+            </select>
+            <p class="help" id="county-help">County must match your ZIP for an accurate result.</p>
+            <p class="error" id="county-error" role="alert" aria-live="polite"></p>
+          </div>
+
+          <div class="submit-row">
+            <button type="submit" id="submit-btn">Look up plans</button>
+            <button type="button" id="reset-btn" class="secondary">Reset</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section aria-labelledby="results-heading">
+      <h2 id="results-heading">Results</h2>
+      <div class="card">
+        <div id="results" aria-live="polite" aria-atomic="false">
+          <p class="results-placeholder" id="results-placeholder">Enter a ZIP code and county above to see which UC HMO plans are available to you.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section aria-labelledby="notes-heading">
+      <h2 id="notes-heading">Notes for UC HMOs</h2>
+      <div class="card notes">
+        <ul>
+          <li>Both ZIP code and matching (overlapping) county must be entered for an accurate result.</li>
+          <li>If a plan does not appear above, that plan is not available.</li>
+          <li>Availability may differ between Medicare and non-Medicare HMOs through the same insurance company.</li>
+          <li>If a county does not appear in the dropdown list, HMOs are not available in that county.</li>
+          <li>To be eligible, employees must live or work in the service area of an HMO.</li>
+          <li>To be eligible, retirees must live in the service area of an HMO.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Via Benefits -->
+    <section aria-labelledby="via-heading">
+      <h2 id="via-heading">Coverage Outside California</h2>
+      <div class="card via-benefits">
+        <p style="margin-top:0;">Eligible retirees who have a home address outside of California, but remain in the USA (not U.S. territories), get separate, non-UC coverage through <strong>Via Benefits</strong> if they:</p>
+        <ul>
+          <li>Are notified by UC/Via Benefits that they are eligible for the program,</li>
+          <li>Are age 65+ and covering only age 65+ dependents,</li>
+          <li>Are enrolled in Medicare Parts A &amp; B, with all covered dependents enrolled in Parts A &amp; B.</li>
+        </ul>
+        <p>Plan availability through Via is dependent upon the state/county of residence; contact Via directly to determine plan availability.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer role="contentinfo">
+    <p>Source: University of California Medical Plan Availability data, 2026.</p>
+  </footer>
+
+  <script src="plan-lookup.js" defer></script>
+</body>
+</html>
