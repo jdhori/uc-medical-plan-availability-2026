@@ -127,23 +127,13 @@
       var kpCountyCode = countyEntry.Kaiser || null;
       var kp = combine(kpZipCode, kpCountyCode);
 
-      // Western Health Advantage -- no ZIP-level data in the sheet, so rely on
-      // county coverage (only when the ZIP actually sits in that county)
-      var whaCountyCode = countyEntry.WHA || null;
-      var wha = null;
-      if (countyMatchesZip && whaCountyCode) {
-        if (whaCountyCode === 'ALL') wha = 'non-Medicare and Medicare';
-        else if (whaCountyCode === 'BAS') wha = 'non-Medicare';
-      }
-
       return {
         zip: zip,
         county: county,
         countyMatchesZip: countyMatchesZip,
         plans: [
           { name: 'Health Net Blue & Gold HMO', availability: hn },
-          { name: 'Kaiser Permanente North',     availability: kp },
-          { name: 'Western Health Advantage',    availability: wha }
+          { name: 'Kaiser Permanente North',     availability: kp }
         ]
       };
     }
