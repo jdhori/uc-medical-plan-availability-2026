@@ -105,7 +105,7 @@
       var hasCountyMed    = countyCode === 'ALL';
       var nm = hasZipNonMed && hasCountyNonMed;
       var med = hasZipMed && hasCountyMed;
-      if (nm && med) return 'non-Medicare and Medicare';
+      if (nm && med) return 'non-Medicare and Kaiser Senior Advantage';
       if (nm) return 'non-Medicare';
       if (med) return 'Medicare';
       return null;
